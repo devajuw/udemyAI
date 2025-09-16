@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Run Python File",
+        "type": "shell",
+        "command": "python",
+        "args": ["${file}"],
+        "presentation": {
+          "reveal": "always",
+          "echo": false,       // hides the `$ python ...` command
+          "focus": true,
+          "panel": "shared"
+        },
+        "problemMatcher": []
+      }
+    ]
+  }
