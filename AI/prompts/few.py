@@ -23,6 +23,6 @@ A: (A+B+C) ^ 2 = A^2 + B^2 + C^2 + 2AB + 2BC + 2CA
 response = client.chat.completions.create(
     model="gemini-2.0-flash", messages=[
         { "role": "system", "content": SYSTEM_PROMPT } #system prompt  
-    ,{"role": "user", "content": "What is (A+B+C) ^2."}]) #user prompt
+    ,{"role": "user", "content": "What is (A+B+C) ^4."}]) #user prompt
     
 print(response.choices[0].message.content)
