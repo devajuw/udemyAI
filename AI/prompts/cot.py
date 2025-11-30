@@ -46,14 +46,16 @@ while True:
         model="gemini-2.0-flash",
         response_format={"type": "json_object"},
         messages=message_history
-            )
+    )
 
-raw_result : (response.choices[0].message.content)
-message_history.append({"role":"assistant", "content":raw_result})
-parsed_result = json.loads(raw_result)
-
-if parsed_result.get("step")== "START":
-    print("🔥",parsed_result.get(content))
+    raw_result = response.choices[0].message.content
+    message_history.append({"role":"assistant", "content":raw_result})
+    parsed_result = json.loads(raw_result)
+    
+    print(f"{parsed_result.get('step')}: {parsed_result.get('content')}")
+    
+    if parsed_result.get("step") == "OUTPUT":
+        break
           
 
 
