@@ -19,10 +19,9 @@ def get_weather(city: str):
         return f"The weather in {city} is {response.text}"
     else:
         return "Someting went wrong"
-available_tools =
-{
-    "get_weather" :get_weather
-}    
+available_tools = {
+    "get_weather": get_weather
+}
 def main():
     user_query = input("> ")
     response = client.models.generate_content(
