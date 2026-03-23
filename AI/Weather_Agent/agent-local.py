@@ -1,10 +1,10 @@
 # Weather Agent using Ollama (local, no quota limits!)
 import json
 import requests
-
+from pydantic import BaseModel, Field
 # Ollama uses an OpenAI-compatible API running locally
 from openai import OpenAI
-
+from typing import Optional
 client = OpenAI(
 
 # Part - Meaning
@@ -16,7 +16,7 @@ client = OpenAI(
     api_key="ollama",
 )
 
-MODEL = "gemma3:4b"  
+MODEL = "gemma3:1b"  
 
 SYSTEM_PROMPT = """
 You're an expert AI assistant in resolving user queries using chain of thought, you work on START, PLAN, and output steps.
@@ -64,6 +64,14 @@ available_tools = {
     "get_weather": get_weather,
 }
 
+print("\n\n\n\n")
+
+class MyOutputFormat(BaseModel):
+    step: str = Field(..., description="The ID of the step. Example: PLAN,OUTPUT,TOOL")
+    content: Optional[str]= Field(None, description="The optional string content for the step")
+    tool: Optional[str]= Field(None, description="The ID of the tool to call")
+    input: Optional[str]= Field(None, description="The input params for the tool")
+
 # Build message history using OpenAI-style dicts (Ollama is OpenAI-compatible)
 message_history = [
     {"role": "system", "content": SYSTEM_PROMPT},
@@ -73,22 +81,28 @@ user_query = input("👉 ")
 message_history.append({"role": "user", "content": user_query})
 
 while True:
-    response = client.chat.completions.create(
+    response = client.chat.completions.parse(
         model=MODEL,
         messages=message_history,
-        response_format={"type": "json_object"},
+        response_format=MyOutputFormat,
     )
 
-    raw_result = response.choices[0].message.content
-    message_history.append({"role": "assistant", "content": raw_result})
+    message = response.choices[0].message
+    
+    # Append the raw text content to history, NOT the parsed object
+    message_history.append({"role": "assistant", "content": message.content})
 
-    # Safely parse the JSON
-    try:
-        parsed_result = json.loads(raw_result)
-    except json.JSONDecodeError:
-        # If multiple JSON objects, take the first valid one
-        first_line = raw_result.strip().split("\n")[0]
-        parsed_result = json.loads(first_line)
+    # Safely get the parsed result as a dictionary
+    if message.parsed:
+        # Convert Pydantic object to dict so your .get() calls work
+        parsed_result = message.parsed.model_dump()
+    else:
+        # Fallback for manual parsing if automatic parsing failed
+        try:
+            parsed_result = json.loads(message.content)
+        except Exception:
+            print(f"⚠️ Error: Could not parse model response as JSON: {message.content}")
+            continue
 
     step = parsed_result.get("step")
     print(f"🤔 {step}: {parsed_result.get('content') or parsed_result.get('input', '')}")
