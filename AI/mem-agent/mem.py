@@ -16,6 +16,14 @@ config = {
             "base_url": "http://localhost:11434"
         }
     },
+    "graph store":{
+        "provider": "neo4j",
+        "config":{
+            "url": "",
+            "username": "nep4j",
+            "password": ""
+        }
+    }
     "vector_store": {
         "provider": "qdrant",
         "config": {
