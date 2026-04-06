@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, HTTPException, Query
 from redis import Redis
 from rq import Queue
 from .worker import process_query
@@ -19,3 +19,11 @@ def chat(
     job = queue.enqueue(process_query, query)
 
     return {"status": "queued", "job_id": job.id}
+
+@app.get('/job-status')
+def get_result(
+    job_id: str = Query(..., description="The job id")
+):
+    result = job.return_value()
+    return {"result", result}
+
